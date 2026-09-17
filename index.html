@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07111f" />
+  <title>MediRoute | Hospital Medication Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" data-action="go-home" aria-label="MediRoute home">
+      <span class="brand-mark">+</span>
+      <span>
+        <strong>MediRoute</strong>
+        <small>Hospital Robot Dispatch</small>
+      </span>
+    </a>
+    <div class="topbar-actions">
+      <span class="connection-chip" id="connectionChip"><i></i> Connecting database</span>
+      <button class="ghost-button hidden" id="logoutButton" type="button">Log out</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="homeView" class="view active">
+      <div class="hero-shell">
+        <div class="hero-copy">
+          <span class="eyebrow">Autonomous medical delivery workflow</span>
+          <h1>Fast medication requests.<br><span>Clear delivery status.</span></h1>
+          <div class="hero-points">
+            <span>● Room-wise requests</span>
+            <span>● Live status updates</span>
+            <span>● Robot dispatch tracking</span>
+          </div>
+        </div>
+
+        <div class="role-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-label">Choose access</span>
+              <h2>Hospital Dashboard Login</h2>
+            </div>
+            <span class="shield-icon">✓</span>
+          </div>
+
+          <button class="role-card medication-role" type="button" data-role="medication">
+            <span class="role-icon">Rx</span>
+            <span class="role-copy">
+              <strong>Medication Room</strong>
+              <small>Receive, prepare and dispatch orders</small>
+            </span>
+            <span class="arrow">→</span>
+          </button>
+
+          <button class="role-card ward-role" type="button" data-role="ward">
+            <span class="role-icon">ICU</span>
+            <span class="role-copy">
+              <strong>ICU / Normal Ward / OP</strong>
+              <small>Request medicines and track delivery</small>
+            </span>
+            <span class="arrow">→</span>
+          </button>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="medicationView" class="view dashboard-view">
+      <div class="dashboard-header">
+        <div>
+          <span class="section-label">Medication Room Control</span>
+          <h1>Order & Robot Dispatch Dashboard</h1>
+          <p>Monitor every room request and update delivery progress.</p>
+        </div>
+        <div class="dashboard-header-actions">
+          <div class="header-status-card">
+            <span class="status-light green"></span>
+            <div><strong>Robot Ready</strong><small>Waiting for dispatch</small></div>
+          </div>
+          <button class="small-button export-button" id="medicationExportButton" type="button" title="Download the last 24 hours of order activity as an Excel file">Print 24h Excel</button>
+          <button class="small-button reset-counts-button" id="resetDeliveryButton" type="button">Reset delivery counts</button>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="medicationStats"></div>
+
+      <div class="dashboard-layout">
+        <section class="content-card rooms-card">
+          <div class="card-heading">
+            <div><span class="section-label">Hospital rooms</span><h2>Room Status</h2></div>
+          </div>
+          <div class="room-grid" id="roomGrid"></div>
+        </section>
+
+        <section class="content-card orders-card">
+          <div class="card-heading">
+            <div><span class="section-label">Incoming requests</span><h2>Medication Orders</h2></div>
+            <span class="notification-count" id="pendingBadge">0 pending</span>
+          </div>
+          <div class="filter-row" id="orderFilters">
+            <button class="filter active" data-filter="active">Active</button>
+            <button class="filter" data-filter="all">All</button>
+            <button class="filter" data-filter="delivered">Delivered</button>
+          </div>
+          <div class="order-list" id="orderList"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="wardView" class="view dashboard-view">
+      <div class="dashboard-header">
+        <div>
+          <span class="section-label">Ward Medication Request</span>
+          <h1 id="wardTitle">Room Dashboard</h1>
+          <p>Choose the required medicines, enter each quantity and send the order.</p>
+        </div>
+        <div class="dashboard-header-actions">
+          <div class="header-status-card">
+            <span class="status-light green"></span>
+            <div><strong id="wardUserLabel">Ward connected</strong><small>Medication room online</small></div>
+          </div>
+          <button class="small-button export-button" id="wardExportButton" type="button" title="Download this room's last 24 hours of order activity as an Excel file">Print 24h Excel</button>
+        </div>
+      </div>
+
+      <div class="ward-layout">
+        <section class="content-card request-card">
+          <div class="card-heading">
+            <div><span class="section-label">New order</span><h2>Request Medication</h2></div>
+            <span class="request-id-preview" id="requestPreview">Ready</span>
+          </div>
+
+          <form id="requestForm" class="request-form">
+            <div class="medicine-builder">
+              <div class="medicine-builder-heading">
+                <div>
+                  <strong>Medicines</strong>
+                  <span>Choose one or more medicines for the same request.</span>
+                </div>
+                <button class="small-button add-medicine-button" id="addMedicineButton" type="button">+ Add medicine</button>
+              </div>
+              <div class="medicine-rows" id="medicineRows"></div>
+            </div>
+
+            <label>
+              Priority
+              <div class="priority-options">
+                <input type="radio" name="priority" id="normalPriority" value="Normal" checked>
+                <label for="normalPriority">Normal</label>
+                <input type="radio" name="priority" id="urgentPriority" value="Urgent">
+                <label for="urgentPriority">Urgent</label>
+                <input type="radio" name="priority" id="emergencyPriority" value="Emergency">
+                <label for="emergencyPriority">Emergency</label>
+              </div>
+            </label>
+
+            <label>
+              Notes <span class="optional">optional</span>
+              <textarea id="notesInput" rows="3" placeholder="Patient reference, dosage instruction or other information"></textarea>
+            </label>
+
+            <button class="primary-button" type="submit">Send Request to Medication Room <span>→</span></button>
+          </form>
+        </section>
+
+        <section class="content-card tracking-card">
+          <div class="card-heading">
+            <div><span class="section-label">Delivery updates</span><h2>My Requests</h2></div>
+            <button class="small-button" id="clearDeliveredButton" type="button">Clear delivered</button>
+          </div>
+          <div class="tracking-list" id="wardOrderList"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop hidden" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="login-modal">
+      <button class="modal-close" id="closeLogin" type="button" aria-label="Close">×</button>
+      <div class="login-icon" id="loginIcon">Rx</div>
+      <span class="section-label">Secure access</span>
+      <h2 id="loginTitle">Medication Room Login</h2>
+      <p id="loginDescription">Enter the authorised username and password.</p>
+      <form id="loginForm">
+        <label>Username<input id="usernameInput" autocomplete="username" required placeholder="Enter username" /></label>
+        <label>Password<input id="passwordInput" type="password" autocomplete="current-password" required placeholder="Enter password" /></label>
+        <div class="login-error hidden" id="loginError">Incorrect username or password.</div>
+        <button class="primary-button" type="submit">Open Dashboard <span>→</span></button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+    <div class="order-modal-card">
+      <button class="modal-close" id="closeOrderModal" type="button" aria-label="Close">×</button>
+      <div id="orderModalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
